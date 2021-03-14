@@ -40,6 +40,28 @@ disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Block RQ decomposition.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test RQ decomposition');
+
+% Create random m-by-n matrix.
+m = 500;
+n = 400;
+A = rand(m,n);
+
+% Compute RQ decomposition.
+[R, Q] = blockRQ(A);
+
+err = norm(A - R * Q);
+disp(['  ||A - R * Q|| = ', num2str(err)]);
+
+err = norm(eye(n) - Q * Q');
+disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Block eigenvalue reordering.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
