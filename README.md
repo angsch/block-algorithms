@@ -5,5 +5,6 @@ This file collection contains prototype realizations of linear algebra algorithm
  * Cholesky decomposition
  * QR decomposition
  * RQ decomposition
+ * LQ decomposition
  * Eigenvalue reordering in a Schur decomposition
  * LU decomposition

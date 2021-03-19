@@ -62,6 +62,28 @@ disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Block LQ decomposition.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test LQ decomposition');
+
+% Create random m-by-n matrix.
+m = 1234;
+n = 123;
+A = rand(m,n);
+
+% Compute QR decomposition.
+[L, Q] = blockLQ(A);
+
+err = norm(A - L * Q);
+disp(['  ||A - L * Q|| = ', num2str(err)]);
+
+err = norm(eye(n) - Q * Q');
+disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Block eigenvalue reordering.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
