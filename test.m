@@ -72,13 +72,35 @@ m = 1234;
 n = 123;
 A = rand(m,n);
 
-% Compute QR decomposition.
+% Compute LQ decomposition.
 [L, Q] = blockLQ(A);
 
 err = norm(A - L * Q);
 disp(['  ||A - L * Q|| = ', num2str(err)]);
 
 err = norm(eye(n) - Q * Q');
+disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Block QL decomposition.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test QL decomposition');
+
+% Create random m-by-n matrix.
+m = 1000;
+n = 500;
+A = rand(m,n);
+
+% Compute QL decomposition.
+[Q, L] = blockQL(A);
+
+err = norm(A - Q * L);
+disp(['  ||A - Q * L|| = ', num2str(err)]);
+
+err = norm(eye(m) - Q * Q');
 disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
 
 clear all;

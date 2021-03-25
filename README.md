@@ -6,5 +6,6 @@ This file collection contains prototype realizations of linear algebra algorithm
  * QR decomposition
  * RQ decomposition
  * LQ decomposition
+ * QL decomposition
  * Eigenvalue reordering in a Schur decomposition
  * LU decomposition
