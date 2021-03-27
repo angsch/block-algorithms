@@ -8,4 +8,5 @@ This file collection contains prototype realizations of linear algebra algorithm
  * LQ decomposition
  * QL decomposition
  * Eigenvalue reordering in a Schur decomposition
+ * Reduction to block Hessenberg form
  * LU decomposition
