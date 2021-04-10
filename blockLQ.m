@@ -1,7 +1,7 @@
 function [L, Q] = blockLQ(A)
 %BLOCKLQ   Triangular-orthogonal decomposition.
 %    [L, Q] = BLOCKLQ(A), where A is an m-by-n matrix, produces an m-by-n lower
-%    triangular matrix L and an n-by-n orthogonal matrix Q so that A = L*Q.
+%    triangular matrix L and an n-by-n unitary matrix Q so that A = L*Q.
 
     % Extract dimensions.
     [m, n] = size(A);
@@ -18,7 +18,7 @@ function [L, Q] = blockLQ(A)
             % LQ decomposition of the current block row.
             [A(i:min(m,i+blksz-1),i:n), Qj] = smallLQ(A(i:min(m,i+blksz-1),i:n));
 
-            % Trailing matrix update. A * Qj'
+            % Trailing matrix update.
             A(i+blksz:m,i:n) = A(i+blksz:m,i:n) * Qj';
 
             % Update Q.

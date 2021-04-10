@@ -26,7 +26,7 @@ display('Test QR decomposition');
 % Create random m-by-n matrix.
 m = 2000;
 n = 1000;
-A = rand(m,n);
+A = rand(m,n) + 1i * rand(m,n);
 
 % Compute QR decomposition.
 [Q, R] = blockQR(A);
@@ -35,7 +35,7 @@ err = norm(A - Q * R);
 disp(['  ||A - Q * R|| = ', num2str(err)]);
 
 err = norm(eye(m) - Q * Q');
-disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+disp(['  ||I - Q * Q^H|| = ', num2str(err)]);
 
 clear all;
 
@@ -48,7 +48,7 @@ display('Test RQ decomposition');
 % Create random m-by-n matrix.
 m = 500;
 n = 400;
-A = rand(m,n);
+A = rand(m,n) + 1i * rand(m,n);
 
 % Compute RQ decomposition.
 [R, Q] = blockRQ(A);
@@ -57,7 +57,7 @@ err = norm(A - R * Q);
 disp(['  ||A - R * Q|| = ', num2str(err)]);
 
 err = norm(eye(n) - Q * Q');
-disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+disp(['  ||I - Q * Q^H|| = ', num2str(err)]);
 
 clear all;
 
@@ -70,7 +70,7 @@ display('Test LQ decomposition');
 % Create random m-by-n matrix.
 m = 1234;
 n = 123;
-A = rand(m,n);
+A = rand(m,n) + 1i * rand(m,n);
 
 % Compute LQ decomposition.
 [L, Q] = blockLQ(A);
@@ -79,7 +79,7 @@ err = norm(A - L * Q);
 disp(['  ||A - L * Q|| = ', num2str(err)]);
 
 err = norm(eye(n) - Q * Q');
-disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+disp(['  ||I - Q * Q^H|| = ', num2str(err)]);
 
 clear all;
 
@@ -92,7 +92,7 @@ display('Test QL decomposition');
 % Create random m-by-n matrix.
 m = 1000;
 n = 500;
-A = rand(m,n);
+A = rand(m,n) + 1i * rand(m,n);
 
 % Compute QL decomposition.
 [Q, L] = blockQL(A);
@@ -101,13 +101,15 @@ err = norm(A - Q * L);
 disp(['  ||A - Q * L|| = ', num2str(err)]);
 
 err = norm(eye(m) - Q * Q');
-disp(['  ||I - Q * Q^T|| = ', num2str(err)]);
+disp(['  ||I - Q * Q^H|| = ', num2str(err)]);
 
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Block reduction to block Hessenberg form.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test reduction to block Hessenberg form');
 
 n = 1000;
 A = rand(n,n);

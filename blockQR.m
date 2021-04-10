@@ -1,7 +1,7 @@
 function [Q, R] = blockQR(A)
 %BLOCKQR   Orthogonal-triangular decomposition.
 %    [Q, R] = BLOCKQR(A), where A is an m-by-n matrix, produces an m-by-n upper
-%    triangular matrix R and an m-by-m orthogonal matrix Q so that A = Q*R.
+%    triangular matrix R and an m-by-m unitary matrix Q so that A = Q*R.
 
     % Extract dimensions.
     [m, n] = size(A);

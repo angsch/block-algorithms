@@ -1,7 +1,7 @@
 function [Q, L] = blockQL(A)
 %BLOCKQL   Orthogonal-triangular decomposition.
 %    [Q, L] = BLOCKQL(A), where A is an m-by-n matrix, produces an m-by-m
-%    orthogonal matrix Q and an m-by-n lower triangular matrix L so that A = Q*L.
+%    unitary matrix Q and an m-by-n lower triangular matrix L so that A = Q*L.
 
     % Extract dimensions.
     [m, n] = size(A);
