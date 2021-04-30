@@ -10,3 +10,4 @@ This file collection contains prototype realizations of linear algebra algorithm
  * Eigenvalue reordering in a Schur decomposition
  * Reduction to block Hessenberg form
  * LU decomposition
+ * Solver of shifted Hessenberg systems

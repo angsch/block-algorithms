@@ -160,3 +160,24 @@ A = rand(n,n);
 
 err = norm(P * A - L * U);
 disp(['  ||P * A - L * U|| =', num2str(err)]);
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Simultaneous solution of shifted Hessenberg systems.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+n = 1000;
+num_rhs = 0.25 * n;
+
+% Create a random Hessenberg matrix, random shifts and right-hand sides.
+Lambda = rand(num_rhs,1);
+B = ones(n,num_rhs);
+A = rand(n,n);
+H = hess(A);
+
+% Solve (H - Lambda(k) * eye(n)) * X(:,k) = B(:,k).
+X = blockShiftedHessenbergSolve(H, Lambda, B);
+
+err = norm(H * X - X * diag(Lambda) - B);
+disp(['  ||H * X - X * diag(Lambda) - B|| = ', num2str(err)]);
