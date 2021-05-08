@@ -9,11 +9,17 @@ n = 1000;
 A = rand(n) + n * eye(n);
 A = A + A';
 
-% Compute Cholesky factorization.
+% Compute Cholesky factorization A = L * L'.
 L = tril(blockCholesky(A));
 
 err = norm(L * L' - A);
 disp(['  || L * L^T - A || = ', num2str(err)])
+
+% Compute Cholesky factorization A = R' * R.
+R = triu(blockCholesky(A, 'upper'));
+
+err = norm(R' * R - A);
+disp(['  || R^T * R - A || = ', num2str(err)])
 
 clear all;
 
