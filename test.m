@@ -154,6 +154,32 @@ disp(['  ||I - Q * Q^H|| = ', num2str(err)])
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bulge chasing with offdiagonal block updates.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Generate random Hessenberg matrix.
+n = 1111;
+H = triu(randn(n), -1);
+
+% Set number of bulges such that half the matrix is filled.
+nb = floor(n / 2 / 3);
+
+% Place nb tightly packed bulges in top left corner.
+for bulge = 1:nb
+    k = 1+(bulge-1)*3;
+    H(k+1:k+3, k:k+2) = randn(3);
+end
+
+% Call the chase routine.
+[A, Q] = blockBulgeChase(H, nb);
+
+err = norm(A - Q' * H * Q);
+disp(['  ||A - Q^T * H * Q|| = ', num2str(err)])
+
+err = norm(eye(n) - Q * Q');
+disp(['  ||I - Q * Q^T|| = ', num2str(err)])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Block LU decomposition with partial pivoting.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
