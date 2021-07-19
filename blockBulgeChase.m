@@ -94,7 +94,8 @@ function [H, Q, nMoves] = chase(H, nb)
             k = 1 + (bulge - 1) * 3 + i - 1;
 
             % Reduce the first column of the bulge.
-            [v, tau, r] = gallery('house', H(k+1:k+3, k));
+            r = -sign(H(k+1, k)) * norm(H(k+1:k+3, k));
+            [v, tau] = gallery('house', H(k+1:k+3, k));
             H(k+1:k+3, k) = [r; 0; 0];
 
             % Left update.
