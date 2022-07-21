@@ -4,7 +4,8 @@ function X = blockShiftedHessenbergSolve(H, Mu, B)
 %    H * X - X * diag(Mu) = B, where H is an upper Hessenberg matrix,
 %    Mu is an n-vector of shifts, and B in an m-by-n matrix. All data is real.
 %
-%    This protype demonstrates the core ideas presented in arXiv:2101.05063
+%    This protype demonstrates the core ideas presented in
+%    https://doi.acm.org?doi=3544789 (available as preprint: arXiv:2101.05063)
 %    for a solving a series of shifted Hessenberg systems such that the
 %    majority of the flops is matrix-matrix multiplications.
 
