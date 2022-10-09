@@ -187,10 +187,6 @@ function [c, s, Rtildes] = reduce(H, Mu, partitioning)
                 cur_blk_col = cur_blk_col - 1;
             end
 
-            % h = H(1:k,k-1) - mu * E(1:k,k-1)
-            h = H(1:k,k-1);
-            h(k-1) = h(k-1) - Mu(rhs);
-
             % Reduce H by applying a Givens rotation from the right.
             r(1:k) = [ H(1:k,k-1) - Mu(rhs) * E(1:k,k-1), r(1:k) ] * G(:,1);
         end
