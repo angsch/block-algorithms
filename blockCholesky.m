@@ -14,7 +14,7 @@ function L = blockCholesky(A, shape)
         shape = 'lower';
     end
 
-    if shape ~= 'lower' and shape ~= 'upper'
+    if shape ~= 'lower' && shape ~= 'upper'
         error('Shape must upper or lower.');
     end
 
