@@ -213,3 +213,26 @@ X = blockShiftedHessenbergSolve(H, Lambda, B);
 
 err = norm(H * X - X * diag(Lambda) - B);
 disp(['  ||H * X - X * diag(Lambda) - B|| = ', num2str(err)]);
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Blocked least squares via a QR factorization.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+t = 0:0.25:3';
+b = [2.9986, 2.6569, 2.4291, 2.2664, 2.1444, 2.0495, 1.9736, 1.9115, 1.8597, 1.8159, 1.7783, 1.7458, 1.7173]';
+% Number of data points
+m = size(b)(1)
+% Number of parameters
+n = 2
+A = zeros(m, n);
+A(:,1) = arrayfun(@(t) 1 / (1+t), t)';
+A(:,2) = ones(m, 1);
+X = blockLeastSquares(A, b);
+% Fitted model
+f = @(x) X(1) / (1 + x) + X(2)
+% Plot fitted model
+residuals = b - arrayfun(f, t)';
+norm(residuals)
+% plot(t, residuals, '*')
