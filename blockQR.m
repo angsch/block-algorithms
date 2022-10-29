@@ -29,6 +29,7 @@ function [Q, R] = blockQR(A)
             % Update Q.
             Q = Q * [eye(j-1),         zeros(j-1,m-j+1);
                      zeros(m-j+1,j-1), Qj               ];
+        end
     end
     R = triu(A);
 end
