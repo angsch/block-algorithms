@@ -199,6 +199,8 @@ clear all;
 % Simultaneous solution of shifted Hessenberg systems.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+display('Test shifted Hessenberg system solve');
+
 n = 1000;
 num_rhs = 0.25 * n;
 
@@ -220,19 +222,47 @@ clear all;
 % Blocked least squares via a QR factorization.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+display('Test least squares via QR factorization');
+
 t = 0:0.25:3';
 b = [2.9986, 2.6569, 2.4291, 2.2664, 2.1444, 2.0495, 1.9736, 1.9115, 1.8597, 1.8159, 1.7783, 1.7458, 1.7173]';
 % Number of data points
-m = size(b)(1)
+m = size(b)(1);
 % Number of parameters
-n = 2
+n = 2;
 A = zeros(m, n);
 A(:,1) = arrayfun(@(t) 1 / (1+t), t)';
 A(:,2) = ones(m, 1);
-X = blockLeastSquares(A, b);
+X = blockLeastSquares(A, b, 'notranspose');
 % Fitted model
-f = @(x) X(1) / (1 + x) + X(2)
+f = @(x) X(1) / (1 + x) + X(2);
 % Plot fitted model
 residuals = b - arrayfun(f, t)';
 norm(residuals)
 % plot(t, residuals, '*')
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Blocked Triangular Solve.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test triangular solve');
+
+n = 234; nrhs = 10;
+
+% Create a diagonally dominant matrix.
+A = rand(n) + eye(n) * 2 * n;
+B = rand(n, nrhs);
+
+% Solve lower triangular system L * X = B.
+L = tril(A);
+X = blockTriangularSolve(L, B);
+err = norm(L * X - B);
+disp(['  || L * X - B || = ', num2str(err)])
+
+% Solver upper triangular system U * X = B.
+U = triu(A);
+X = blockTriangularSolve(U, B, 'upper');
+err = norm(U * X - B);
+disp(['  || U * X - B || = ', num2str(err)])
