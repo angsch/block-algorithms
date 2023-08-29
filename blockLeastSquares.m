@@ -2,7 +2,8 @@ function X = blockLeastSquares(A, B, transA)
 %BLOCKLEASTSQUARES   Solves a least squares problem
 %    X = BLOCKLEASTSQUARES(A, B) finds the X that minimizes
 %    ||A * X - B|| or ||A**T * X - B|| using an orthogonal-
-%    triangular factorization. Possible transA
+%    triangular factorization. Possible values of transA
+%    are 't' (transpose) and 'n' (no transpose).
 
     % Extract dimensions.
     [m, n] = size(A);
