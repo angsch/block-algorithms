@@ -266,3 +266,23 @@ U = triu(A);
 X = blockTriangularSolve(U, B, 'upper');
 err = norm(U * X - B);
 disp(['  || U * X - B || = ', num2str(err)])
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bidiagonal SVD (unblocked)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+n = 6;
+d = rand(n,1); %diagonal entries
+e = rand(n-1,1); %superdiagonal entries
+
+B = diag(d) + diag(e,1);
+[U, S, V] = bidiagSVD(B);
+
+err = norm(U*S*V'-B);
+disp(['  ||U*S*V^T-B || = ', num2str(err)])
+err = norm(U*U' - eye(n));
+disp(['  || U * U^T - I || = ', num2str(err)])
+err = norm(V*V' - eye(n));
+disp(['  || V * V^T - I || = ', num2str(err)])
