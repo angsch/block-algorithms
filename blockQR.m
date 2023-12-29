@@ -17,7 +17,7 @@ function [Q, R] = blockQR(A)
     else
         % Use blocked qr.
         for j=1:blksz:k
-            % Compute width of k-th panel.
+            % Compute width of j-th panel.
             b = min(n-j+1, blksz);
             
             % QR decomposition of panel.
