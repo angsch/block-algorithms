@@ -273,6 +273,8 @@ clear all;
 % Bidiagonal SVD (unblocked)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+display('Test SVD of bidiagonal matrix by implicitly shifted QR algorithm');
+
 n = 6;
 d = rand(n,1); %diagonal entries
 e = rand(n-1,1); %superdiagonal entries
@@ -281,8 +283,29 @@ B = diag(d) + diag(e,1);
 [U, S, V] = bidiagSVD(B);
 
 err = norm(U*S*V'-B);
-disp(['  ||U*S*V^T-B || = ', num2str(err)])
+disp(['  || U*S*V^T-B || = ', num2str(err)])
 err = norm(U*U' - eye(n));
 disp(['  || U * U^T - I || = ', num2str(err)])
 err = norm(V*V' - eye(n));
 disp(['  || V * V^T - I || = ', num2str(err)])
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reduction to triangular band form.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test reduction to triangular band form');
+
+bandwidth = 8;
+m = 100;
+n = 60;
+A = rand(m, n);
+[B, Q, P] = blockReduceToTriangularBand(A, bandwidth);
+
+err = norm(Q'*A*P-B);
+disp(['  || Q*A*P^T-B || = ', num2str(err)])
+err = norm(Q*Q' - eye(m));
+disp(['  || Q * Q^T - I || = ', num2str(err)])
+err = norm(P*P' - eye(n));
+disp(['  || P * P^T - I || = ', num2str(err)])
