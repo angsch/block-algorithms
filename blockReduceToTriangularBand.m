@@ -17,6 +17,7 @@ function [B, Q, P] = blockReduceToTriangularBand(A, blksz)
     Q = eye(m);
     P = eye(n);
 
+    % Stage 1: Reduce the general matrix to a triangular band matrix.
     if m >= n
         % Reduce to upper triangular band form.
         for j=1:blksz:n
@@ -70,4 +71,124 @@ function [B, Q, P] = blockReduceToTriangularBand(A, blksz)
                      zeros(m-b-i+1,i+b-1), Qi                    ];
         end
     end
+
+    % Stage 2: Reduce the triangular band matrix to a bidiagonal matrix.
+    [B, Q, P] = bandToBidiagonal(B, Q, P);
+end
+
+
+function [B, Q, P] = bandToBidiagonal(A, Q, P)
+    % Extract dimensions.
+    [m, n] = size(A);
+
+    if m >= n
+        % Extract the bandwidth.
+        bw = nnz(A(1, :)) - 1;
+
+        % Reduce band matrix to upper bidiagonal form row by row.
+        for row = 1:n-2
+            % Generate elementary reflector to annihilate A(row,row+2:n)
+            % and introduce bulge.
+            r = -sign(A(row,row+1)) * norm(A(row, row+1:n));
+            [v, tau] = gallery('house', A(row, row+1:n));
+            A(row, row+1:n) = [r, zeros(1,n-row-1)];
+
+            % Right update.
+            A(row+1:m,row+1:n) = ...
+                A(row+1:m,row+1:n) - tau * (A(row+1:m,row+1:n) * v) * v';
+
+            % Accumulate reflectors for P.
+            P(:,row+1:n) = P(:,row+1:n) - tau * (P(:,row+1:n) * v) * v';
+
+            % Chase the bulge off.
+            j1 = row+1;
+            for i = row+1:bw:m
+                if j1 >= n
+                    continue;
+                end
+
+                % Generate elementary reflector to annihilate fill-in A(i+1:m,j1).
+                r = -sign(A(i,j1)) * norm(A(i:m, j1));
+                [v, tau] = gallery('house', A(i:m, j1));
+                A(i:m, j1) = [r; zeros(m-i,1)];
+
+                % Left update.
+                A(i:m,j1+1:n) = A(i:m,j1+1:n) - tau * v * (v' * A(i:m,j1+1:n));
+
+                % Accumulate reflectors for Q.
+                Q(:,j1:m) = Q(:,j1:m) - tau * (Q(:,j1:m) * v) * v';
+
+                % Advance j1 to newly generated fill-in.
+                j1 = j1 + bw;
+
+                if j1 < n
+                    % Generate elementary reflector to annihilate fill-in A(i,j1:n).
+                    r = -sign(A(i,j1)) * norm(A(i, j1:n));
+                    [v, tau] = gallery('house', A(i, j1:n));
+                    A(i, j1:n) = [r, zeros(1,n-j1)];
+
+                    % Right update.
+                    A(i+1:m,j1:n) = A(i+1:m,j1:n) - tau * (A(i+1:m,j1:n) * v) * v';
+
+                    % Accumulate reflectors for P.
+                    P(:,j1:n) = P(:,j1:n) - tau * (P(:,j1:n) * v) * v';
+                end
+            end
+        end
+    else
+        % Extract the bandwidth.
+        bw = nnz(A(:, 1)) - 1;
+
+        % Reduce band matrix to upper bidiagonal form column by column.
+        for col = 1:m-2
+            % Generate elementary reflector H to annihilate A(col+2:m,col)
+            % and introduce bulge.
+            r = -sign(A(col+1,col)) * norm(A(col+1:m, col));
+            [v, tau] = gallery('house', A(col+1:m,col));
+            A(col+1:m,col) = [r; zeros(m-col-1,1)];
+
+            % Left update.
+            A(col+1:m,col+1:n) = ...
+                A(col+1:m,col+1:n) - tau * v * (v' * A(col+1:m,col+1:n));
+
+            % Accumulate reflectors for Q.
+            Q(:,col+1:m) = Q(:,col+1:m) - tau * (Q(:,col+1:m) * v) * v';
+
+            % Chase the bulge off.
+            i = col+1;
+            for j1 = col+1:bw:n
+                if i >= m
+                    continue;
+                end
+
+                % Generate elementary reflector to annihilate fill-in A(i,j1:n).
+                r = -sign(A(i,j1)) * norm(A(i, j1:n));
+                [v, tau] = gallery('house', A(i, j1:n));
+                A(i, j1:n) = [r, zeros(1,n-j1)];
+
+                % Right update.
+                A(i+1:m,j1:n) = A(i+1:m,j1:n) - tau * (A(i+1:m,j1:n) * v) * v';
+
+                % Accumulate reflectors for P.
+                P(:,j1:n) = P(:,j1:n) - tau * (P(:,j1:n) * v) * v';
+                
+                i = i + bw;
+                if i < m
+                    % Generate elementary reflector to annihilate fill-in A(i+1:m,j1).
+                    r = -sign(A(i,j1)) * norm(A(i:m, j1));
+                    [v, tau] = gallery('house', A(i:m, j1));
+                    A(i:m, j1) = [r; zeros(m-i,1)];
+
+                    % Left update.
+                    A(i:m,j1+1:n) = A(i:m,j1+1:n) - tau * v * (v' * A(i:m,j1+1:n));
+
+                    % Accumulate reflectors for Q.
+                    Q(:,i:m) = Q(:,i:m) - tau * (Q(:,i:m) * v) * v';
+                end
+            end
+        end
+        % TODO: convert to upper bidiagonal
+    end
+
+    B = A;
 end
