@@ -304,7 +304,7 @@ A = rand(m, n);
 [B, Q, P] = blockReduceToTriangularBand(A, bandwidth);
 
 err = norm(Q'*A*P-B);
-disp(['  || Q*A*P^T-B || = ', num2str(err)])
+disp(['  || Q^T*A*P-B || = ', num2str(err)])
 err = norm(Q*Q' - eye(m));
 disp(['  || Q * Q^T - I || = ', num2str(err)])
 err = norm(P*P' - eye(n));
