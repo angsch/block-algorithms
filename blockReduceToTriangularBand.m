@@ -187,8 +187,18 @@ function [B, Q, P] = bandToBidiagonal(A, Q, P)
                 end
             end
         end
-        % TODO: convert to upper bidiagonal
+        % Transform to upper bidiagonal form.
+        for i = 1:m-1
+            % Apply Givens rotation annihilating A(i+1,i) from the left.
+            [c, s] = givens(A(i,  i), A(i+1,i));
+            A(i:i+1,i:i+1) = [ c  s;
+                              -s  c] * A(i:i+1,i:i+1);
+            A(i+1,i) = 0.0;
+            Q(:,i:i+1) = Q(:,i:i+1) * [ c -s;
+                                        s  c ];
+        end
     end
 
     B = A;
 end
+
