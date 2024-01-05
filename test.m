@@ -309,3 +309,25 @@ err = norm(Q*Q' - eye(m));
 disp(['  || Q * Q^T - I || = ', num2str(err)])
 err = norm(P*P' - eye(n));
 disp(['  || P * P^T - I || = ', num2str(err)])
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Test SVD
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test SVD via Polar decomposition');
+
+n = 100;
+A = rand(n,n) + 1i * rand(n,n);
+[U, S, V] = blockSVD(A, 'polar');
+
+err = norm(U * S * V' - A);
+disp(['  || U * S * V^H - A || = ', num2str(err)]);
+err = norm(U*U' - eye(n));
+disp(['  || U * U^H - I || = ', num2str(err)])
+err = norm(V*V' - eye(n));
+disp(['  || V * V^H - I || = ', num2str(err)])
+
+% Plot singular value distribution
+% semilogy(S, '-o')
