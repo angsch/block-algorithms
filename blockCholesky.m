@@ -14,8 +14,8 @@ function L = blockCholesky(A, shape)
         shape = 'lower';
     end
 
-    if shape ~= 'lower' && shape ~= 'upper'
-        error('Shape must upper or lower.');
+    if ~strcmp(shape, 'lower') && ~strcmp(shape, 'upper')
+        error("Shape must be 'upper' or 'lower'.");
     end
 
     % Extract dimension.
