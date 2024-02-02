@@ -9,8 +9,10 @@ function [U, H] = polar(A, algorithm)
 
     if strcmp(algorithm,'Newton')
         [U, H] = polarNewton(A);
+    elseif strcmp(algorithm,'QDWH')
+        [U, H] = QDWH(A);
     else
-        error("Supported 'algorithm' options: 'Newton'");
+        error("Supported 'algorithm' options: 'Newton', 'QDWH'");
     end
 end
 
@@ -57,3 +59,63 @@ function [U, H] = polarNewton(A)
     error('Not converged, condition number = %.2e', cond(A));
 end
 
+function [U, H] = QDWH(A)
+% QDWH Polar decomposition by QR-based dynamically weighted Halley iteration
+%    [U,H] = QDWH(A) factors the square full-rank matrix A
+%    into a unitary U and a Hermitian positive definite matrix
+%    H such that A = U*H.
+
+    % Section4, QDWH algorithm as presented in
+    % https://web.cs.ucdavis.edu/~bai/Winter09/nakatsukasabaigygi09.pdf
+    % X_{k+1} = X_k (a_k I + b_k X_k^H * X_k)(I + c_k X_k^HX_k)^-1, X_0 = A/alpha
+
+    % TODO: Since the smallest singular value is approximated via the inverse,
+    % the routine is currently limited to square matrices.
+
+    % Extract dimension.
+    [n,~] = size(A);
+
+    % Estimate largest/smallest singular value (alpha/beta)
+    alpha = norm(A, 'fro');
+    beta = 1/norm(inv(A), 'fro'); % TODO: should not use the inverse
+
+    % Convergence threshold
+    tol = nthroot(4 * eps,3);
+
+    X = A / alpha;
+    l = beta / alpha;
+
+    maxIter = 8;
+    iter = 1;
+    while iter < maxIter
+        Xold = X;
+
+        % Compute weights dynamically.
+        d = nthroot(4 * (1-l^2)/l^4, 3);
+        a = sqrt(1+d) + 0.5*sqrt(8-4*d+8*(2-l^2)/(l^2 * sqrt(1+d)));
+        b = (a-1)^2 / 4;
+        c = a+b-1;
+
+        assert(l <= 1);
+        assert(3 <= a && a <= (2+l)/l);
+        assert(b >= 1);
+        assert(c >= a);
+
+        % Compute QR factorization.
+        [Q, R] = qr([ sqrt(c)*Xold;
+                      eye(n,n)     ]);
+
+        % Update X.
+        X = (b/c) * Xold + (1/sqrt(c))*(a-b/c)*Q(1:n,1:n)*Q(n+1:2*n,1:n)';
+        l = l * (a+b*l^2)/(1+c*l^2);
+
+        % Convergence test
+        if norm(Xold - X, 'fro') <= tol
+            U = X;
+            H = U' * A;
+            % (a,b,c) should converge to Halley's iteration (3,1,3).
+            return;
+        end
+        iter = iter + 1;
+    end
+end
