@@ -1,13 +1,32 @@
+function [B, Q, P] = blockReduceToBidiagonal(A, blksz)
+%BLOCKREDUCETOBIDIAGONAL   Compute a bidiagonal decomposition of the matrix A.
+%    [B, Q, P] = BLOCKREDUCETOBIDIAGONAL(A) reduces an m-by-n matrix A to
+%    an upper bidiagonal matrix B by a unitary transformation Q' * A * P = B.
+%
+%    Calling the routine with the optional "blksz" argument controls the bandwidth
+%    of the intermediate result. Specifically, the decomposition uses a two-stage
+%    algorithm, where the first stage reduces A to a triangular band matrix of 
+%    bandwidth blksz. The second stage reduces the band matrix further to bidiagonal
+%    form.
+
+    if nargin < 2
+        blksz = 20;
+    end
+
+    % Stage 1: Reduce the general matrix to a triangular band matrix.
+    [B, Q, P] = blockReduceToTriangularBand(A, blksz);
+
+    % Stage 2: Reduce the triangular band matrix to a bidiagonal matrix.
+    [B, Q, P] = bandToBidiagonal(B, Q, P);
+
+end
+
 function [B, Q, P] = blockReduceToTriangularBand(A, blksz)
 %BLOCKREDUCETOTRIANGULARBAND   Reduction to triangular band form.
 %    [B, Q, P] = BLOCKREDUCETOTRIANGULARBAND(A) reduces an m-by-n matrix A to
 %    triangular band matrix B by an orthogonal transformation Q' * A * P = B.
 %    If m >= n, B is upper triangular; if m < n, B is lower triangular.
 %    The width of the band corresponds to blksz.
-
-    if nargin < 2
-        blksz = 20;
-    end
 
     B = A;
 
@@ -71,9 +90,6 @@ function [B, Q, P] = blockReduceToTriangularBand(A, blksz)
                      zeros(m-b-i+1,i+b-1), Qi                    ];
         end
     end
-
-    % Stage 2: Reduce the triangular band matrix to a bidiagonal matrix.
-    [B, Q, P] = bandToBidiagonal(B, Q, P);
 end
 
 
