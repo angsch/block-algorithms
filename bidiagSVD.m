@@ -23,10 +23,6 @@ function [U, S, V] = bidiagSVD(B)
         error("B must be square");
     end
 
-    % Extract diagonal and superdiagonal
-    d = diag(B)
-    e = diag(B,1)
-    
     % Want to find U, Sigma, and V so that B = U*Sigma*V^T
     U = eye(n);
     V = eye(n);
