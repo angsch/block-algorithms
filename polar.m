@@ -69,21 +69,21 @@ function [U, H] = QDWH(A)
     % https://web.cs.ucdavis.edu/~bai/Winter09/nakatsukasabaigygi09.pdf
     % X_{k+1} = X_k (a_k I + b_k X_k^H * X_k)(I + c_k X_k^HX_k)^-1, X_0 = A/alpha
 
-    % TODO: Since the smallest singular value is approximated via the inverse,
-    % the routine is currently limited to square matrices.
-
     % Extract dimension.
-    [n,~] = size(A);
+    [m, n] = size(A);
 
-    % Estimate largest/smallest singular value (alpha/beta)
-    alpha = norm(A, 'fro');
-    beta = 1/norm(inv(A), 'fro'); % TODO: should not use the inverse
+    % Transform the problem into one for square matrices.
+    [Q1, R] = qr(A);
 
     % Convergence threshold
     tol = nthroot(4 * eps,3);
 
-    X = A / alpha;
-    l = beta / alpha;
+    % Estimate largest singular value.
+    alpha = norm(A, 'fro');
+    X = R / alpha;
+
+    % Estimate reciprocal condition number.
+    l = 1/condest(R);
 
     maxIter = 8;
     iter = 1;
@@ -96,6 +96,7 @@ function [U, H] = QDWH(A)
         b = (a-1)^2 / 4;
         c = a+b-1;
 
+        % (a,b,c) should converge to Halley's iteration (3,1,3).
         assert(l <= 1);
         assert(3 <= a && a <= (2+l)/l);
         assert(b >= 1);
@@ -111,9 +112,9 @@ function [U, H] = QDWH(A)
 
         % Convergence test
         if norm(Xold - X, 'fro') <= tol
-            U = X;
+            U = Q1*X;
             H = U' * A;
-            % (a,b,c) should converge to Halley's iteration (3,1,3).
+            disp(['  Iterations until convergence reached: ', num2str(iter)]);
             return;
         end
         iter = iter + 1;
