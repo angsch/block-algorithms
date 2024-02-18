@@ -292,16 +292,16 @@ disp(['  || V * V^T - I || = ', num2str(err)])
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reduction to triangular band form.
+% Reduction to upper bidiagonal form.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-display('Test reduction to triangular band form');
+display('Test 2-stage reduction to bidiagonal form');
 
-bandwidth = 8;
+blksz = 8;
 m = 100;
 n = 60;
 A = rand(m, n);
-[B, Q, P] = blockReduceToTriangularBand(A, bandwidth);
+[B, Q, P] = blockReduceToBidiagonal(A, blksz);
 
 err = norm(Q'*A*P-B);
 disp(['  || Q^T*A*P-B || = ', num2str(err)])
@@ -331,3 +331,21 @@ disp(['  || V * V^H - I || = ', num2str(err)])
 
 % Plot singular value distribution
 % semilogy(S, '-o')
+
+clear all;
+
+
+display('Test SVD via bidiagonal QR iterations');
+n = 8;
+A = rand(n,n);
+[U, S, V] = blockSVD(A, 'bidiag');
+
+err = norm(U * S * V' - A);
+disp(['  || U * S * V^H - A || = ', num2str(err)]);
+err = norm(U*U' - eye(n));
+disp(['  || U * U^H - I || = ', num2str(err)])
+err = norm(V*V' - eye(n));
+disp(['  || V * V^H - I || = ', num2str(err)])
+
+%err = norm(svd(A) - diag(S))/norm(svd(A))
+%disp(['  || S - S_ref ||/||S|| = ', num2str(err)]);
