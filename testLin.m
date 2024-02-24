@@ -179,3 +179,20 @@ err = norm(U * X - B);
 disp(['  || U * X - B || = ', num2str(err)])
 
 clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Block Matrix Inverse. (TRTRI)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test triangular matrix inverse');
+
+n = 1000;
+
+% Create a diagonally dominant upper triangular matrix.
+T = triu(rand(n,n)) + n * eye(n);
+
+% Compute inv(T).
+Tinv = blockInv(T);
+
+err = norm(Tinv*T - eye(n));
+disp(['  || inv(T) * T - I || = ', num2str(err)])
