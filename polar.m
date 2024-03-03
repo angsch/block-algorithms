@@ -78,8 +78,8 @@ function [U, H] = QDWH(A)
     % Convergence threshold
     tol = nthroot(4 * eps,3);
 
-    % Estimate largest singular value.
-    alpha = norm(A, 'fro');
+    % Estimate sigma_max(A) = norm(A,2) <= norm(A, 'fro')
+    alpha = normest(A); % approximates 2-norm
     X = R / alpha;
 
     % Estimate reciprocal condition number.
