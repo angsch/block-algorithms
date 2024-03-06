@@ -8,8 +8,8 @@ function X = blockLeastSquares(A, B, transA)
     % Extract dimensions.
     [m, n] = size(A);
     [m1, nrhs] = size(B);
-    notrans = strncmp(transA, 'n', 1) || strncmp(transA, 'N', 1)
-    trans = strncmp(transA, 't', 1) || strncmp(transA, 'T', 1)
+    notrans = strncmp(transA, 'n', 1) || strncmp(transA, 'N', 1);
+    trans = strncmp(transA, 't', 1) || strncmp(transA, 'T', 1);
 
     if not(notrans) && not(trans)
         error('transA has to be N or T');
