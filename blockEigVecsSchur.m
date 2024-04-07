@@ -10,18 +10,18 @@ function V = blockEigVecsSchur(T)
     V = zeros(n,n);
 
     num_blks = ceil(n/blksz);
-    for k = num_blks-1:-1:0
+    for k = num_blks:-1:1
         % Locate k-th block column spanning k1:k2
-        k1 = k*blksz+1;
-        k2 = min((k+1)*blksz,n);
+        k1 = (k-1)*blksz+1;
+        k2 = min(k*blksz,n);
 
         % Compute eigenvectors corresponding to eigenvalues
         % of current block column.
         shifts = diag(T(k1:k2,k1:k2));
 
-        for j = k:-1:0
-            j1 = j*blksz+1;
-            j2 = min((j+1)*blksz,n);
+        for j = k:-1:1
+            j1 = (j-1)*blksz+1;
+            j2 = min(j*blksz,n);
             if j == k
                 % Find eigenvectors of block of T.
                 V(j1:j2,k1:k2) = eigVecs(T(k1:k2,k1:k2));
