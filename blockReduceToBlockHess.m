@@ -45,4 +45,39 @@ function [P, H] = blockReduceToBlockHess(A, b)
                  zeros(n-k-r+1, k+r-1),  Q                     ];
     end
     H = A;
+
+    % Reduce block Hessenberg matrix to upper Hessenberg form.
+    [Q, H] = mHessToHess(H);
+    P = P * Q;
+end
+
+function [P, H] = mHessToHess(H)
+    [n, ~] = size(H);
+    P = eye(n);
+
+    % Extract the bandwidth.
+    bw = nnz(H(:, 1)) - 1
+
+    % Introduce bulge
+    for col = 1:1 %n-2
+        % Generate elementary reflector to annihilate H(col+2:n,col)
+        % and introduce bulge.
+        r = -sign(H(col+1,col)) * norm(H(col+1:col+bw, col));
+        [v, tau] = gallery('house', H(col+1:col+bw, col));
+        H(col+1:col+bw, col) = [r, zeros(1,bw-1)];
+
+        % Left update.
+        H(col+1:col+bw, col+1:end) = ...
+            H(col+1:col+bw, col+1:end) - tau * v * (v' * H(col+1:col+bw, col+1:end))
+
+        % Right update.
+        H(1:end, col+1:col+bw) = H(1:end, col+1:col+bw) - tau * (H(1:end, col+1:col+bw)*v)*v';
+
+        % Accumulate reflectors.
+        P(:, col+1:col+bw) = P(:, col+1:col+bw) - tau * (P(:, col+1:col+bw) * v) * v';
+
+        % TODO: Chase off the bulge
+        % TODO: Introduce more than one bulge
+    end
+
 end
