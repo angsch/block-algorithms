@@ -11,8 +11,10 @@ function [U, H] = polar(A, algorithm)
         [U, H] = polarNewton(A);
     elseif strcmp(algorithm,'QDWH')
         [U, H] = QDWH(A);
+    elseif strcmp(algorithm,'Zolo')
+        [U, H] = zolo(A);
     else
-        error("Supported 'algorithm' options: 'Newton', 'QDWH'");
+        error("Supported 'algorithm' options: 'Newton', 'QDWH', 'Zolo'");
     end
 end
 
@@ -119,4 +121,116 @@ function [U, H] = QDWH(A)
         end
         iter = iter + 1;
     end
+end
+
+function [U, H] = zolo(A)
+% ZOLO Polar decomposition by Zolotarev's functions.
+%    [U,H] = zolo(A) factors the m-by-n full-rank matrix A
+%    into a unitary U and a Hermitian positive definite matrix
+%    H such that A = U*H.
+%
+%    This is an improved version of Algorithm 1 in
+%    https://people.maths.ox.ac.uk/nakatsukasa/publishedpdf/zoloeigsvd.pdf
+
+    % Number of factors to use, chosen such that two iterations suffice.
+    r = 8;
+
+    [~,m] = size(A);
+
+    % Transform the problem into one for square matrices.
+    [Q0, R] = qr(A);
+
+    % Estimate largest singular value.
+    alpha = norm(A, 'fro');
+    X = R/alpha;
+
+    %disp(['  cond(X) at the beginning = ', num2str(cond(X))]);
+
+    % Estimate reciprocal condition number.
+    l = 1/condest(R);
+
+    lprime = sqrt(1-l^2);
+    assert(real(lprime^2) <= 1 || iscomplex(lprime^2));
+    Kprime = ellipke(lprime^2/(lprime^2-1)) / sqrt(1-lprime^2);
+    % Matlab's ellipke only works for input in the range [0,1]
+    % Use ellipticK from the symbolic toolbox instead
+    % Kprime = ellipticK(lprime^2/(lprime^2-1)) / sqrt(1-lprime^2)
+
+    c = zeros(2*r,1);
+    for j = 1:2*r
+        % Note second input parameter should be lprime^2 as Matlab defines
+        % the Jacobi elliptic functions using parameter M=lprime^2
+        [sn, cn] = ellipj(j*Kprime/(2*r+1), lprime^2);
+        c(j) = l^2 * (sn^2/cn^2);
+    end
+
+    % Note bug in paper, which says
+    %            a(j) = -prod(some c) * prod(some c);
+    % should be  a(j) = -prod(some c) / prod(some c);
+    a = zeros(r,1);
+    for j = 1:r
+        a(j) = -prod(c(2*j-1) - c(2:2:2*r) ) / prod(c(2*j-1) - c(setdiff(1:2:2*r-1,2*j-1)) );
+    end
+
+
+    Mhat = prod( (1 + c(1:2:2*r-1)) ./ (1 + c(2:2:2*r) ) );
+
+    Q = cell(r,1); % Use a cell array in case we want to go back and check...
+    Xupdate = zeros(size(X));
+    for j = 1:r
+
+        [Q{j},~] = qr([X; sqrt(c(2*j-1)) * eye(m)]);
+
+        % Mimic economy mode
+        Q1 = Q{j}(1:m,1:m);
+        Q2 = Q{j}(m+1:end,1:m);
+
+        Xupdate = Xupdate + a(j)/sqrt(c(2*j-1)) * Q1 * Q2';
+    end
+    X = Mhat*(X+Xupdate);
+
+    % Step 1 is complete. The conditioning has improved so that
+    % we can use Cholesky-based iterations.
+
+    %disp(['  cond(X) after one iteration = ', num2str(cond(X))]);
+
+    l = Mhat * l * prod( (l^2 + c(2:2:2*r)) ./ (l^2 + c(1:2:2*r-1)) );
+    lprime = sqrt(1-l^2);
+    Kprime = ellipke(lprime^2/(lprime^2-1)) / sqrt(1-lprime^2);
+    % Matlab's ellipke only works for input in the range [0,1]
+    % Use ellipticK from the symbolic toolbox
+    % Kprime = double(ellipticK(sym(lprime^2/(lprime^2-1))) / sqrt(1-lprime^2))
+
+    c = zeros(2*r,1);
+    for j = 1:2*r
+        % Note second input parameter should be lprime^2 as Matlab defines
+        % the Jacobi elliptic functions using parameter M=lprime^2
+        [sn, cn] = ellipj(j*Kprime/(2*r+1),lprime^2);
+        c(j) = l^2 * (sn^2/cn^2);
+    end
+
+    a = zeros(r,1);
+    for j = 1:r
+        a(j) = -prod(c(2*j-1) - c(2:2:2*r) ) / ...
+            prod(c(2*j-1) - c(setdiff(1:2:2*r-1,2*j-1)) );
+    end
+    Mhat = prod( (1 + c(1:2:2*r-1)) ./ (1 + c(2:2:2*r) ) );
+
+    R = cell(r,1);
+    Xupdate = zeros(size(X));
+    for j = 1:r
+        Z = X'*X+c(2*j-1)*eye(m);
+        R{j} = chol(Z);
+
+        Xupdate = Xupdate + a(j) * (X * inv(R{j})) * inv(R{j})'; 
+    end
+    % Note typo in paper, says X_2 = Mhat*(X_2 + update)
+    %                should be X_2 = Mhat*(X_1 + update)
+    X = Mhat*(X+Xupdate);
+
+    % Step 2 is complete. In double precision and an initial condition
+    % number of less than 1e+16, the algorithm has converged and
+    % we can compute the Hermitian factor.
+    U = Q0 * X;
+    H = (U'*A+(U'*A)')/2;
 end

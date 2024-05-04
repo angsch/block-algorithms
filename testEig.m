@@ -169,3 +169,20 @@ disp(['  || V * V^H - I || = ', num2str(err)])
 
 %err = norm(svd(A) - diag(S))/norm(svd(A))
 %disp(['  || S - S_ref ||/||S|| = ', num2str(err)]);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Test Polar decomposition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display("Test Polar decomposition via Zolotarev's functions (Zolo-pd)");
+n = 100;
+A = rand(n,n) + 1i * rand(n,n);
+[U, H] = polar(A, 'Zolo');
+
+err = norm(U * H - A);
+disp(['  ||U * H - A|| = ', num2str(err)]);
+
+err = norm(U' * U - eye(n));
+disp(['  ||U^H * U - I|| = ', num2str(err)]);
+
