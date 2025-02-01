@@ -15,6 +15,9 @@ This file collection contains prototype realizations of linear algebra algorithm
    - Reduction to block Hessenberg form
    - Solver of shifted Hessenberg systems
    - Eigenvalue reordering in a Schur decomposition
+ * Singular Value Decomposition
+   - Implicitly shifted bidiagonal QR algorithm
+   - Polar decomposition SVD via Newton, QDWH, Zolo-pd
  * Solvers
    - Least Squares solver (via QR)
    - Triangular Solve
