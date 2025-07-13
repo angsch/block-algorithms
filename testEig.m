@@ -90,6 +90,21 @@ disp(['  ||H * X - X * diag(Lambda) - B|| = ', num2str(err)]);
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Test eigenvalue counting
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display("Test eigenvalue counting");
+n = 100;
+A = rand(n,n) + 1i * rand(n,n);
+x0 = complex(0,0);
+r = 2;
+count = eigCountCircle(A, x0, r);
+
+Lambda = eig(A);
+trueCount = sum(abs(Lambda) < r);
+disp(['  Missed eigenvalues in circle = ', num2str(abs(trueCount-count))]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Bidiagonal SVD (unblocked)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -185,4 +200,3 @@ disp(['  ||U * H - A|| = ', num2str(err)]);
 
 err = norm(U' * U - eye(n));
 disp(['  ||U^H * U - I|| = ', num2str(err)]);
-
