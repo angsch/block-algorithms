@@ -200,3 +200,23 @@ disp(['  ||U * H - A|| = ', num2str(err)]);
 
 err = norm(U' * U - eye(n));
 disp(['  ||U^H * U - I|| = ', num2str(err)]);
+
+clear all;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Test symmetric eigenvalue decomposition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display("Test symmetric eigenvalue decomposition (Jacobi's method)");
+n = 100;
+A = rand(n,n) + 1i * rand(n,n);
+A = A + A'; % hermitianize
+[V, LAMBDA, nsweep] = eigJacobi(A);
+
+disp(['  number of Jacobi sweeps = ', num2str(nsweep)]);
+
+err = norm(V' * A * V - diag(LAMBDA));
+disp(['  ||V^H * A * V - diag(LAMBDA)|| = ', num2str(err)]);
+
+err = norm(V' * V - eye(n));
+disp(['  ||V^H * V - I|| = ', num2str(err)]);
