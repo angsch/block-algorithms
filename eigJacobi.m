@@ -22,10 +22,21 @@ function [V, LAMBDA, nsweep] = eigJacobi(A, tol)
     Afp32 = single(A);
     [Vfp32, Dfp32] = eig(Afp32);
     % Reorthogonalize Vfp32 to have an orthogonal basis in FP64.
-    [V,~] = qr(double(Vfp32));
+    %[V,~] = qr(double(Vfp32));
+    V = newtonSchulz(double(Vfp32));
     Aprecond = V' * A * V;
-    
+
     [V, LAMBDA, nsweep] = jacobi(Aprecond, V, tol);
+end
+
+function Q = newtonSchulz(Q)
+% NEWTONSCHULZ   Reorthogonalize the matrix Q.
+%    Q = newtonSchulz(Q) orthogonalizes a matrix Q that
+%    satisfies norm(Q'*Q-eye(n)) < 1e-5.
+    [n, ~] = size(Q);
+    for iter = 1:3
+        Q = 0.5 * Q * (3*eye(n) - Q' * Q);
+    end
 end
 
 function J = jacobi_rotation(A)
