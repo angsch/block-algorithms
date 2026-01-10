@@ -1,19 +1,31 @@
-function [U, S, VT] = svdJacobi(A, options)
+function [U, S, V] = svdJacobi(A, options)
 %SVDJACOBI   Singular value decomposition
-%    [U, S, VT] = SVDJACOBI(A), computes a singular value
+%    [U, S, V] = SVDJACOBI(A), computes a singular value
 %    decomposition of A using Jacobi's method. That is,
-%    U' * A * VT = diag(S).
+%    A = U * S * V'.
+%    The optional argument options is a structure that can be
+%    used to configure the algorithm by setting the following
+%    fields:
+%    - tol:      Tolerance when to stop.
+%    - oneSided: If set to true, use the one-sided Jacobi algorithm,
+%                otherwise, use two-sided Jacobi algorithm.
+%    - precond:  If set to true, use preconditioning,
+%                otherwise, no preconditioning is used.
 %
+
     % Extract dimensions.
     [m, n] = size(A);
 
-    % FIXME: reduced SVD
+    % TODO: reduced SVD
 
     if nargin < 2
-        options.tol = sqrt(n) * eps;    % Tolerance when to stop
-        options.oneSided = false;
-        options.precond = true;
+        options = struct();
     end
+    % Populate all options
+    if ~isfield(options, 'tol'),      options.tol = sqrt(n) * eps; end
+    if ~isfield(options, 'oneSided'), options.oneSided = false;    end
+    if ~isfield(options, 'precond'),  options.precond = true;     end
+
 
     tol = options.tol;
 
@@ -22,12 +34,12 @@ function [U, S, VT] = svdJacobi(A, options)
         Afp32 = single(A);
         %[Ufp32, Sfp32, Vfp32] = svd(Afp32); % SGESVD
         if options.oneSided
-            VT = single(eye(n));
-            [Ufp32, Sfp32, Vfp32] = svdJacobi1Sided(Afp32, VT, tol);
+            V = single(eye(n));
+            [Ufp32, Sfp32, Vfp32] = svdJacobi1Sided(Afp32, V, tol);
         else
             U = single(eye(m)); % full
-            VT = single(eye(n));
-            [Ufp32, Sfp32, Vfp32] = svdJacobi2Sided(Afp32, U, VT, tol);
+            V = single(eye(n));
+            [Ufp32, Sfp32, Vfp32] = svdJacobi2Sided(Afp32, U, V, tol);
         end
         % Reorthogonalize Vfp32, Ufp32.
         V0 = newtonSchulz(double(Vfp32));
@@ -40,22 +52,21 @@ function [U, S, VT] = svdJacobi(A, options)
     end
     
     if options.oneSided
-        [U, S, VT] = svdJacobi1Sided(Aprecond, V0, tol);
+        [U, S, V] = svdJacobi1Sided(Aprecond, V0, tol);
         U = U0 * U;
     else
-        [U, S, VT] = svdJacobi2Sided(Aprecond, U0, V0, tol);
+        [U, S, V] = svdJacobi2Sided(Aprecond, U0, V0, tol);
     end
 
     % Sort singular values and corresponding singular vectors.
     [~,ind] = sort(S, 'descend');
     S = S(ind);
-    VT = VT(:,ind);
+    V = V(:,ind);
     U = U(:,ind);
 
-    norm(U' * A * VT - diag(S))
 end
 
-function [U, S, VT] = svdJacobi1Sided(A, VT, tol)
+function [U, S, V] = svdJacobi1Sided(A, V, tol)
     % Extract dimensions.
     [m, n] = size(A);
 
@@ -90,7 +101,7 @@ function [U, S, VT] = svdJacobi1Sided(A, VT, tol)
                     A(:,[p,q]) = A(:,[p,q]) * J;
 
                     % Update V from the right.
-                    VT(:,[p,q]) = VT(:,[p,q]) * J;
+                    V(:,[p,q]) = V(:,[p,q]) * J;
                 end
             end
         end
@@ -106,7 +117,7 @@ function [U, S, VT] = svdJacobi1Sided(A, VT, tol)
 end
 
 
-function [U, S, VT] = svdJacobi2Sided(A, U, VT, tol)
+function [U, S, V] = svdJacobi2Sided(A, U, V, tol)
     % Extract dimensions.
     [m, n] = size(A);
 
@@ -136,7 +147,7 @@ function [U, S, VT] = svdJacobi2Sided(A, U, VT, tol)
                     A(q,p) = 0.0;
 
                     % Update V from the right.
-                    VT(:,[p,q]) = VT(:,[p,q]) * Jr;
+                    V(:,[p,q]) = V(:,[p,q]) * Jr;
                     
                     % Update U from the right.
                     U(:,[p,q]) = U(:,[p,q]) * Jl;
