@@ -2,7 +2,7 @@ function [U, S, V] = svdJacobi(A, options)
 %SVDJACOBI   Singular value decomposition
 %    [U, S, V] = SVDJACOBI(A), computes a singular value
 %    decomposition of A using Jacobi's method. That is,
-%    A = U * S * V'.
+%    A = U * S * V'. The matrix A is assumed to be square.
 %    The optional argument options is a structure that can be
 %    used to configure the algorithm by setting the following
 %    fields:
@@ -15,8 +15,9 @@ function [U, S, V] = svdJacobi(A, options)
 
     % Extract dimensions.
     [m, n] = size(A);
-
-    % TODO: reduced SVD
+    if m ~= n
+        error('The matrix A must be square.');
+    end
 
     if nargin < 2
         options = struct();
@@ -24,20 +25,19 @@ function [U, S, V] = svdJacobi(A, options)
     % Populate all options
     if ~isfield(options, 'tol'),      options.tol = sqrt(n) * eps; end
     if ~isfield(options, 'oneSided'), options.oneSided = false;    end
-    if ~isfield(options, 'precond'),  options.precond = true;     end
-
-
-    tol = options.tol;
+    if ~isfield(options, 'precond'),  options.precond = true;      end
 
     if options.precond
+        % Adjust tolerance to single precision preconditioner.
+        tol = sqrt(n) * eps(single(1));
+
         % Single-precision preconditioner.
         Afp32 = single(A);
-        %[Ufp32, Sfp32, Vfp32] = svd(Afp32); % SGESVD
         if options.oneSided
             V = single(eye(n));
             [Ufp32, Sfp32, Vfp32] = svdJacobi1Sided(Afp32, V, tol);
         else
-            U = single(eye(m)); % full
+            U = single(eye(n));
             V = single(eye(n));
             [Ufp32, Sfp32, Vfp32] = svdJacobi2Sided(Afp32, U, V, tol);
         end
@@ -47,10 +47,13 @@ function [U, S, V] = svdJacobi(A, options)
         Aprecond = U0' * A * V0;
     else
         Aprecond = A;
-        U0 = eye(m);
+        U0 = eye(n);
         V0 = eye(n);
     end
-    
+
+
+    % Set the tolerance to the user-defined precision
+    tol = options.tol;
     if options.oneSided
         [U, S, V] = svdJacobi1Sided(Aprecond, V0, tol);
         U = U0 * U;
@@ -63,12 +66,12 @@ function [U, S, V] = svdJacobi(A, options)
     S = S(ind);
     V = V(:,ind);
     U = U(:,ind);
-
 end
+
 
 function [U, S, V] = svdJacobi1Sided(A, V, tol)
     % Extract dimensions.
-    [m, n] = size(A);
+    [n, ~] = size(A);
 
     nsweep = -1;
     maxIter = 30;
@@ -81,7 +84,7 @@ function [U, S, V] = svdJacobi1Sided(A, V, tol)
         done = true;
 
         % Row cyclic Jacobi
-        for p = 1:m
+        for p = 1:n
             for q = p+1:n
                 % Compute [ a c ], the (p,q) submatrix of the Gram matrix A'*A.
                 %         [ c b ]
@@ -106,9 +109,11 @@ function [U, S, V] = svdJacobi1Sided(A, V, tol)
             end
         end
     end
+    display(["Number of sweeps in ", class(A), ": ",num2str(nsweep)]);
+
     % A now holds U * S. Extract singular values S.
-    S = zeros(min(m,n),1);
-    
+    S = zeros(n,1);
+
     % TODO: guard against zero singular values
     for j = 1:n
         S(j) = norm(A(:,j));
@@ -119,7 +124,7 @@ end
 
 function [U, S, V] = svdJacobi2Sided(A, U, V, tol)
     % Extract dimensions.
-    [m, n] = size(A);
+    [n,~] = size(A);
 
     nsweep = -1;
     maxIter = 30;
@@ -130,7 +135,7 @@ function [U, S, V] = svdJacobi2Sided(A, U, V, tol)
         done = true;
 
         % Row cyclic Jacobi
-        for p = 1:m
+        for p = 1:n
             for q = p+1:n
                 if abs(A(p,q)) > tol*sqrt(abs(A(p,p)))*sqrt(abs(A(q,q))) || ...
                    abs(A(q,p)) > tol*sqrt(abs(A(p,p)))*sqrt(abs(A(q,q)))
