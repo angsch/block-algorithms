@@ -46,6 +46,27 @@ disp(['  ||I - Q * Q^H|| = ', num2str(err)]);
 clear all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cholesky QR decomposition.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+display('Test Cholesky QR decomposition');
+m = 200;
+n = 100;
+
+% Create random matrix.
+A = rand(m, n);
+
+% Compute QR factorization
+[Q, R] = cholQR(A);
+
+err = norm(A - Q * R);
+disp(['  ||A - Q * R|| = ', num2str(err)]);
+
+err = norm(eye(n) - Q' * Q);
+disp(['  ||I - Q^H * Q|| = ', num2str(err)]);
+
+clear all;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Block RQ decomposition.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
