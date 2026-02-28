@@ -131,6 +131,9 @@ function [U, S, V] = blockSvdJacobi1Sided(A, V, tol)
     % A now holds U * S. Extract singular values S.
     S = zeros(n,1);
 
+    % Preallocate U.
+    U = zeros(n,n);
+
     % TODO: guard against zero singular values
     for j = 1:n
         S(j) = norm(A(:,j));
@@ -143,17 +146,6 @@ function [U, S, V] = blockSvdJacobi1Sided(A, V, tol)
     V = V(:,ind);
     U = U(:,ind);
 end
-
-function Q = newtonSchulz(Q)
-% NEWTONSCHULZ   Reorthogonalize the matrix Q.
-%    Q = newtonSchulz(Q) orthogonalizes a matrix Q that
-%    satisfies norm(Q'*Q-eye(n)) < 1e-5.
-    [n, ~] = size(Q);
-    for iter = 1:3
-        Q = 0.5 * Q * (3*eye(n) - Q' * Q);
-    end
-end
-
 
 function J = jacobi_rotation(A)
 % JACOBI   Compute a Jacobi rotation.
